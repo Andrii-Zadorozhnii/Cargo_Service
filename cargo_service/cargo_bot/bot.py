@@ -635,14 +635,13 @@ async def handle_add_cargo(message: Message):
         else:
             await message.answer("Название должно быть 2-100 символов")
     elif "origin" not in data:
-        # Проверяем, что выбранный город есть в списке допустимых городов
-        if text in ukraine_cities:  # Проверяем, что выбран город из списка
+        if text in ukraine_cities:
             data["origin"] = text
             await message.answer("Выберите пункт назначения:", reply_markup=ukraine_cities_menu)
         else:
             await message.answer("Пожалуйста, выберите город из кнопок", reply_markup=ukraine_cities_menu)
     elif "destination" not in data:
-        if text in ukraine_cities:  # Проверяем, что выбран город из списка
+        if text in ukraine_cities:
             data["destination"] = text
             await message.answer("Введите название компании:")
         else:
@@ -669,7 +668,7 @@ async def handle_add_cargo(message: Message):
                 await message.answer("У вас нет username. Введите телефон в формате (+380...):")
         elif re.match(r"^\+?[1-9]\d{1,14}$", text):
             data["phone"] = text
-            await message.answer("Введите сумму оплаты:") #, reply_markup=currency_menu
+            await message.answer("Введите сумму оплаты:")
         else:
             await message.answer("Введите корректный телефон в формате (+380...)")
     elif "payment" not in data:
@@ -681,14 +680,14 @@ async def handle_add_cargo(message: Message):
             else:
                 await message.answer("Сумма должна быть > 0")
         except ValueError:
-            await message.answer("Введите сумму оплати")
-    elif "currency" not in data and text in payment_methods:
+            await message.answer("Введите число")
+    elif "currency" not in data and text in [c.split()[0] for c in currency_methods]:
         data["currency"] = text
         await message.answer("Выберите тип транспорта:", reply_markup=truck_menu)
     elif "truck" not in data and text in truck_types:
         data["truck"] = text
         await message.answer("Выберите способ оплаты:", reply_markup=payment_menu)
-    elif "payment_method" not in data and text in currency_methods:
+    elif "payment_method" not in data and text in payment_methods:
         data["payment_method"] = text
         await message.answer("Введите комментарий:")
     elif "description" not in data:
@@ -696,17 +695,39 @@ async def handle_add_cargo(message: Message):
             data["description"] = text
 
             try:
+                # Закрываем старые соединения перед записью
+                await sync_to_async(close_old_connections)()
+
                 # Создаем компанию, если указана
                 company_name = data.get('company')
+                company_obj = None
                 if company_name:
-                    company, _ = await sync_to_async(Company.objects.get_or_create)(company_name=company_name)
-                    data['company_obj'] = company
+                    company_obj, _ = await sync_to_async(Company.objects.get_or_create)(
+                        company_name=company_name
+                    )
 
-                # Сохраняем груз в БД
-                cargo = await save_cargo_to_db(user_id, data)
+                # Получаем пользователя
+                user = await sync_to_async(User.objects.get)(id=user_id)
 
-                # Отправляем уведомление водителям
-                await send_to_drivers_channel(cargo)
+                # Создаем груз
+                cargo = await sync_to_async(Cargo.objects.create)(
+                    name=data['name'],
+                    origin=data['origin'],
+                    destination=data['destination'],
+                    description=data['description'],
+                    phone=data['phone'],
+                    payment=data['payment'],
+                    currency=data.get('currency', 'USD'),
+                    truck=data.get('truck', '🚛 Тент/фура'),
+                    payment_method=data.get('payment_method', '💵 Наличные'),
+                    user=user,
+                    company=company_obj
+                )
+
+                # Отправляем в группу водителей
+                message_id = await send_to_drivers_channel(cargo)
+                if message_id:
+                    await sync_to_async(cargo.__class__.objects.filter(pk=cargo.pk).update)(message_id=message_id)
 
                 await message.answer(
                     f"✅ Груз сохранен!\n{format_cargo_data(cargo)}",
@@ -714,8 +735,11 @@ async def handle_add_cargo(message: Message):
                 )
                 del user_data[user_id]
             except Exception as e:
-                logger.error(f"Ошибка сохранения: {e}")
-                await message.answer("Ошибка сохранения", reply_markup=main_menu)
+                logger.error(f"Ошибка сохранения груза: {str(e)}", exc_info=True)
+                await message.answer(
+                    "Произошла ошибка при сохранении груза. Пожалуйста, попробуйте еще раз.",
+                    reply_markup=main_menu
+                )
         else:
             await message.answer("Комментарий слишком длинный (макс 500 символов)")
 
