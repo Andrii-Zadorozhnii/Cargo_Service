@@ -28,6 +28,68 @@ import sqlite3
 from sqlite3 import Error
 
 from cargo_bot.models import User, Cargo, Company, Manager, Customer
+ukraine_cities = [
+    "Александрия",
+    "Алчевск",
+    "Алешки",
+    "Бахмут",
+    "Бердянск",
+    "Белая Церковь",
+    "Борисполь",
+    "Бровары",
+    "Винница",
+    "Горловка",
+    "Днепр",
+    "Дружковка",
+    "Евпатория",
+    "Житомир",
+    "Желтые Воды",
+    "Запорожье",
+    "Ивано-Франковск",
+    "Ирпень",
+    "Каменец-Подольский",
+    "Каменское",
+    "Керчь",
+    "Киев",
+    "Коломыя",
+    "Константиновка",
+    "Краматорск",
+    "Кривой Рог",
+    "Кропивницкий",
+    "Лисичанск",
+    "Лозовая",
+    "Луцк",
+    "Львов",
+    "Мариуполь",
+    "Мелитополь",
+    "Мукачево",
+    "Николаев",
+    "Никополь",
+    "Новомосковск",
+    "Нетишин",
+    "Обухов",
+    "Одесса",
+    "Павлоград",
+    "Полтава",
+    "Ровно",
+    "Северодонецк",
+    "Северск",
+    "Славянск",
+    "Стаханов",
+    "Сумы",
+    "Тернополь",
+    "Ужгород",
+    "Умань",
+    "Фастов",
+    "Харьков",
+    "Херсон",
+    "Черкассы",
+    "Черновцы",
+    "Чернигов",
+    "Червоноград",
+    "Шостка",
+    "Ялта"
+]
 
 
 # Настройка логирования
@@ -71,14 +133,52 @@ edit_menu = ReplyKeyboardMarkup(
 )
 
 # Меню выбора типа транспорта
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
 truck_menu = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="Тент/фура")],
-        [KeyboardButton(text="Рефрижератор")],
-        [KeyboardButton(text="Изотерм")],
-        [KeyboardButton(text="Открытая платформа")],
-        [KeyboardButton(text="Автоцистерна")],
-        [KeyboardButton(text="🔙 Назад")]
+        [
+            KeyboardButton(text="🚛 Тент/фура"),
+            KeyboardButton(text="❄️ Рефрижератор"),
+            KeyboardButton(text="🧊 Изотерм")
+        ],
+        [
+            KeyboardButton(text="🛻 Открытая платформа"),
+            KeyboardButton(text="🛢️ Автоцистерна"),
+            KeyboardButton(text="📦 Контейнеровоз")
+        ],
+        [
+            KeyboardButton(text="🔻 Низкорамный трал"),
+            KeyboardButton(text="⛏️ Самосвальный полуприцеп"),
+            KeyboardButton(text="🪵 Лесовоз")
+        ],
+        [
+            KeyboardButton(text="🌾 Зерновоз"),
+            KeyboardButton(text="🐄 Животновоз"),
+            KeyboardButton(text="🚗 Автовоз")
+        ],
+        [
+            KeyboardButton(text="♻️ Мультилифт"),
+            KeyboardButton(text="🏗️ Тяжеловоз"),
+            KeyboardButton(text="🧪 Цементовоз")
+        ],
+        [
+            KeyboardButton(text="🔥 Газовоз"),
+            KeyboardButton(text="🥛 Молоковоз"),
+            KeyboardButton(text="📃 Площадка без бортов")
+        ],
+        [
+            KeyboardButton(text="🛠️ Спецтехника перевозка"),
+            KeyboardButton(text="🛎️ Туристический автобус"),
+            KeyboardButton(text="🏍️ Мототранспорт перевозка")
+        ],
+        [
+            KeyboardButton(text="📯 Перевозка опасных грузов (ADR)"),
+            KeyboardButton(text="🧱 Перевозка строительных материалов")
+        ],
+        [
+            KeyboardButton(text="🔙 Назад")
+        ]
     ],
     resize_keyboard=True
 )
@@ -93,13 +193,25 @@ payment_menu = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+ukraine_cities_menu = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text=city)] for city in sorted(ukraine_cities)],
+    resize_keyboard=True
+)
+ukraine_cities_menu.add(KeyboardButton(text="🔙 Назад"))
 
 # Меню выбора валюты
 currency_menu = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="USD")],
-        [KeyboardButton(text="EUR")],
-        [KeyboardButton(text="UAH")],
+        [KeyboardButton(text="USD 🇺🇸"), KeyboardButton(text="EUR 🇪🇺")],
+        [KeyboardButton(text="UAH 🇺🇦"), KeyboardButton(text="GBP 🇬🇧")],
+        [KeyboardButton(text="PLN 🇵🇱"), KeyboardButton(text="CHF 🇨🇭")],
+        [KeyboardButton(text="CAD 🇨🇦"), KeyboardButton(text="AUD 🇦🇺")],
+        [KeyboardButton(text="CNY 🇨🇳"), KeyboardButton(text="JPY 🇯🇵")],
+        [KeyboardButton(text="TRY 🇹🇷"), KeyboardButton(text="AED 🇦🇪")],
+        [KeyboardButton(text="SEK 🇸🇪"), KeyboardButton(text="NOK 🇳🇴")],
+        [KeyboardButton(text="CZK 🇨🇿"), KeyboardButton(text="HUF 🇭🇺")],
+        [KeyboardButton(text="ILS 🇮🇱"), KeyboardButton(text="SGD 🇸🇬")],
+        [KeyboardButton(text="INR 🇮🇳"), KeyboardButton(text="BRL 🇧🇷")],
         [KeyboardButton(text="🔙 Назад")]
     ],
     resize_keyboard=True
@@ -399,6 +511,94 @@ async def handle_input(message: Message):
         await handle_edit_field(message)
 
 
+# async def handle_add_cargo(message: Message):
+#     user_id = message.from_user.id
+#     text = message.text
+#     data = user_data[user_id]["data"]
+#
+#     if "name" not in data:
+#         if 2 <= len(text) <= 100:
+#             data["name"] = text
+#             await message.answer("Введите пункт отправления:")
+#         else:
+#             await message.answer("Название должно быть 2-100 символов")
+#     elif "origin" not in data:
+#         data["origin"] = text
+#         await message.answer("Введите пункт назначения:")
+#     elif "destination" not in data:
+#         data["destination"] = text
+#         await message.answer("Введите название компании:")
+#     elif "company" not in data:
+#         if 2 <= len(text) <= 100:
+#             data["company"] = text
+#             keyboard = ReplyKeyboardMarkup(
+#                 keyboard=[
+#                     [KeyboardButton(text="📱 Ввести телефон в формате (+380...)")],
+#                     [KeyboardButton(text="📲 Использовать Telegram")]
+#                 ],
+#                 resize_keyboard=True
+#             )
+#             await message.answer("Выберите способ контакта:", reply_markup=keyboard)
+#         else:
+#             await message.answer("Название компании должно быть 2-100 символов")
+#     elif "phone" not in data:
+#         if message.text == "📲 Использовать Telegram":
+#             if message.from_user.username:
+#                 data["phone"] = f"@{message.from_user.username}"
+#                 await message.answer("Введите сумму оплаты:", reply_markup=currency_menu)
+#             else:
+#                 await message.answer("У вас нет username. Введите телефон в формате (+380...):")
+#         elif re.match(r"^\+?[1-9]\d{1,14}$", text):
+#             data["phone"] = text
+#             await message.answer("Введите сумму оплаты:", reply_markup=currency_menu)
+#         else:
+#             await message.answer("Введите корректный телефон в формате (+380...)")
+#     elif "payment" not in data:
+#         try:
+#             payment = float(text)
+#             if payment > 0:
+#                 data["payment"] = payment
+#                 await message.answer("Выберите валюту оплаты:", reply_markup=currency_menu)
+#             else:
+#                 await message.answer("Сумма должна быть > 0")
+#         except ValueError:
+#             await message.answer("Введите число")
+#     elif "currency" not in data and text in ["USD", "EUR", "UAH"]:
+#         data["currency"] = text
+#         await message.answer("Выберите тип транспорта:", reply_markup=truck_menu)
+#     elif "truck" not in data and text in ["Тент/фура", "Рефрижератор", "Изотерм", "Открытая платформа", "Автоцистерна"]:
+#         data["truck"] = text
+#         await message.answer("Выберите способ оплаты:", reply_markup=payment_menu)
+#     elif "payment_method" not in data and text in ["Наличные", "Безналичные", "Перевод"]:
+#         data["payment_method"] = text
+#         await message.answer("Введите комментарий:")
+#     elif "description" not in data:
+#         if len(text) <= 500:
+#             data["description"] = text
+#
+#             try:
+#                 # Создаем компанию, если она была указана
+#                 company_name = data.get('company')
+#                 if company_name:
+#                     company, _ = await sync_to_async(Company.objects.get_or_create)(company_name=company_name)
+#                     data['company_obj'] = company
+#
+#                 # Сохраняем груз в БД
+#                 cargo = await save_cargo_to_db(user_id, data)
+#
+#                 # Отправляем уведомление водителям
+#                 await send_to_drivers_channel(cargo)
+#
+#                 await message.answer(
+#                     f"✅ Груз сохранен!\n{format_cargo_data(cargo)}",
+#                     reply_markup=main_menu
+#                 )
+#                 del user_data[user_id]
+#             except Exception as e:
+#                 logger.error(f"Ошибка сохранения: {e}")
+#                 await message.answer("Ошибка сохранения", reply_markup=main_menu)
+#         else:
+#             await message.answer("Комментарий слишком длинный (макс 500 симв)")
 async def handle_add_cargo(message: Message):
     user_id = message.from_user.id
     text = message.text
@@ -407,21 +607,28 @@ async def handle_add_cargo(message: Message):
     if "name" not in data:
         if 2 <= len(text) <= 100:
             data["name"] = text
-            await message.answer("Введите пункт отправления:")
+            await message.answer("Выберите пункт отправления:", reply_markup=ukraine_cities_menu)
         else:
             await message.answer("Название должно быть 2-100 символов")
     elif "origin" not in data:
-        data["origin"] = text
-        await message.answer("Введите пункт назначения:")
+        # Проверяем, что выбранный город есть в списке допустимых городов
+        if text in ukraine_cities:  # Проверяем, что выбран город из списка
+            data["origin"] = text
+            await message.answer("Выберите пункт назначения:", reply_markup=ukraine_cities_menu)
+        else:
+            await message.answer("Пожалуйста, выберите город из кнопок", reply_markup=ukraine_cities_menu)
     elif "destination" not in data:
-        data["destination"] = text
-        await message.answer("Введите название компании:")
+        if text in ukraine_cities:  # Проверяем, что выбран город из списка
+            data["destination"] = text
+            await message.answer("Введите название компании:")
+        else:
+            await message.answer("Пожалуйста, выберите город из кнопок", reply_markup=ukraine_cities_menu)
     elif "company" not in data:
         if 2 <= len(text) <= 100:
             data["company"] = text
             keyboard = ReplyKeyboardMarkup(
                 keyboard=[
-                    [KeyboardButton(text="📱 Ввести телефон")],
+                    [KeyboardButton(text="📱 Ввести телефон в формате (+380...)")],
                     [KeyboardButton(text="📲 Использовать Telegram")]
                 ],
                 resize_keyboard=True
@@ -430,17 +637,17 @@ async def handle_add_cargo(message: Message):
         else:
             await message.answer("Название компании должно быть 2-100 символов")
     elif "phone" not in data:
-        if message.text == "📲 Использовать Telegram":
+        if text == "📲 Использовать Telegram":
             if message.from_user.username:
                 data["phone"] = f"@{message.from_user.username}"
                 await message.answer("Введите сумму оплаты:", reply_markup=currency_menu)
             else:
-                await message.answer("У вас нет username. Введите телефон:")
+                await message.answer("У вас нет username. Введите телефон в формате (+380...):")
         elif re.match(r"^\+?[1-9]\d{1,14}$", text):
             data["phone"] = text
             await message.answer("Введите сумму оплаты:", reply_markup=currency_menu)
         else:
-            await message.answer("Введите корректный телефон")
+            await message.answer("Введите корректный телефон в формате (+380...)")
     elif "payment" not in data:
         try:
             payment = float(text)
@@ -465,7 +672,7 @@ async def handle_add_cargo(message: Message):
             data["description"] = text
 
             try:
-                # Создаем компанию, если она была указана
+                # Создаем компанию, если указана
                 company_name = data.get('company')
                 if company_name:
                     company, _ = await sync_to_async(Company.objects.get_or_create)(company_name=company_name)
@@ -486,8 +693,7 @@ async def handle_add_cargo(message: Message):
                 logger.error(f"Ошибка сохранения: {e}")
                 await message.answer("Ошибка сохранения", reply_markup=main_menu)
         else:
-            await message.answer("Комментарий слишком длинный (макс 500 симв)")
-
+            await message.answer("Комментарий слишком длинный (макс 500 символов)")
 
 async def handle_edit_field(message: Message):
 
