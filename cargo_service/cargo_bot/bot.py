@@ -197,7 +197,7 @@ ukraine_cities_menu = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text=city)] for city in sorted(ukraine_cities)],
     resize_keyboard=True
 )
-ukraine_cities_menu.add(KeyboardButton(text="🔙 Назад"))
+# ukraine_cities_menu.add(KeyboardButton(text="🔙 Назад"))
 
 # Меню выбора валюты
 currency_menu = ReplyKeyboardMarkup(
