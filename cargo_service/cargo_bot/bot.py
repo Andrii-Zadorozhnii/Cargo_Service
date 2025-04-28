@@ -90,6 +90,65 @@ ukraine_cities = [
     "Шостка",
     "Ялта"
 ]
+truck_types = [
+    "🚛 Тент/фура",
+    "❄️ Рефрижератор",
+    "🧊 Изотерм",
+    "🛻 Открытая платформа",
+    "🛢️ Автоцистерна",
+    "📦 Контейнеровоз",
+    "🔻 Низкорамный трал",
+    "⛏️ Самосвальный полуприцеп",
+    "🪵 Лесовоз",
+    "🌾 Зерновоз",
+    "🐄 Животновоз",
+    "🚗 Автовоз",
+    "♻️ Мультилифт",
+    "🏗️ Тяжеловоз",
+    "🧪 Цементовоз",
+    "🔥 Газовоз",
+    "🥛 Молоковоз",
+    "📃 Площадка без бортов",
+    "🛠️ Спецтехника перевозка",
+    "🛎️ Туристический автобус",
+    "🏍️ Мототранспорт перевозка",
+    "📯 Перевозка опасных грузов (ADR)",
+    "🧱 Перевозка строительных материалов"
+]
+payment_methods = [
+    "💵 Наличные",
+    "💳 Безналичные",
+    "💸 Перевод",
+    "🏦 Банковский перевод",
+    "💱 Криптовалюта",
+    "📱 Мобильные платежи",
+    "💻 Онлайн-оплата",
+    "🌍 Международный перевод",
+    "💳 Кредитная карта",
+    "📲 Оплата через приложение",
+    "🛒 Оплата через интернет-магазин",
+    "🏧 Снятие через банкомат",
+    "🎁 Оплата бонусами",
+    "🧾 Оплата чеками",
+    "📤 Оплата через электронные кошельки",
+    "💼 Оплата через бизнес-счёт",
+    "🔁 Обмен валют",
+    "📜 Оплата по договору",
+    "🏠 Оплата через кассу",
+    "🔒 Безопасная оплата",
+    "🎉 Акции/скидки на оплату"
+]
+currency_methods = [
+    "USD 🇺🇸", "EUR 🇪🇺", "UAH 🇺🇦", "GBP 🇬🇧",
+    "PLN 🇵🇱", "CHF 🇨🇭", "CAD 🇨🇦", "AUD 🇦🇺",
+    "CNY 🇨🇳", "JPY 🇯🇵", "TRY 🇹🇷", "AED 🇦🇪",
+    "SEK 🇸🇪", "NOK 🇳🇴", "CZK 🇨🇿", "HUF 🇭🇺",
+    "ILS 🇮🇱", "SGD 🇸🇬", "INR 🇮🇳", "BRL 🇧🇷",
+    "MXN 🇲🇽", "KRW 🇰🇷", "SAR 🇸🇦", "ZAR 🇿🇦",
+    "RUB 🇷🇺", "MYR 🇲🇾", "PHP 🇵🇭", "THB 🇹🇭",
+    "IDR 🇮🇩", "EGP 🇪🇬", "PKR 🇵🇰", "TWD 🇹🇼",
+    "COP 🇨🇴", "NGN 🇳🇬", "VND 🇻🇳", "UAH 🇺🇦"
+]
 
 
 # Настройка логирования
@@ -136,63 +195,16 @@ edit_menu = ReplyKeyboardMarkup(
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 truck_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="🚛 Тент/фура"),
-            KeyboardButton(text="❄️ Рефрижератор"),
-            KeyboardButton(text="🧊 Изотерм")
-        ],
-        [
-            KeyboardButton(text="🛻 Открытая платформа"),
-            KeyboardButton(text="🛢️ Автоцистерна"),
-            KeyboardButton(text="📦 Контейнеровоз")
-        ],
-        [
-            KeyboardButton(text="🔻 Низкорамный трал"),
-            KeyboardButton(text="⛏️ Самосвальный полуприцеп"),
-            KeyboardButton(text="🪵 Лесовоз")
-        ],
-        [
-            KeyboardButton(text="🌾 Зерновоз"),
-            KeyboardButton(text="🐄 Животновоз"),
-            KeyboardButton(text="🚗 Автовоз")
-        ],
-        [
-            KeyboardButton(text="♻️ Мультилифт"),
-            KeyboardButton(text="🏗️ Тяжеловоз"),
-            KeyboardButton(text="🧪 Цементовоз")
-        ],
-        [
-            KeyboardButton(text="🔥 Газовоз"),
-            KeyboardButton(text="🥛 Молоковоз"),
-            KeyboardButton(text="📃 Площадка без бортов")
-        ],
-        [
-            KeyboardButton(text="🛠️ Спецтехника перевозка"),
-            KeyboardButton(text="🛎️ Туристический автобус"),
-            KeyboardButton(text="🏍️ Мототранспорт перевозка")
-        ],
-        [
-            KeyboardButton(text="📯 Перевозка опасных грузов (ADR)"),
-            KeyboardButton(text="🧱 Перевозка строительных материалов")
-        ],
-        [
-            KeyboardButton(text="🔙 Назад")
-        ]
-    ],
+    keyboard=[[KeyboardButton(text=truck)] for truck in sorted(truck_types)],
     resize_keyboard=True
 )
 
 # Меню выбора способа оплаты
 payment_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Наличные")],
-        [KeyboardButton(text="Безналичные")],
-        [KeyboardButton(text="Перевод")],
-        [KeyboardButton(text="🔙 Назад")]
-    ],
+    keyboard=[[KeyboardButton(text=payment)] for payment in sorted(payment_methods)],
     resize_keyboard=True
 )
+
 ukraine_cities_menu = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text=city)] for city in sorted(ukraine_cities)],
     resize_keyboard=True
@@ -201,21 +213,10 @@ ukraine_cities_menu = ReplyKeyboardMarkup(
 
 # Меню выбора валюты
 currency_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="USD 🇺🇸"), KeyboardButton(text="EUR 🇪🇺")],
-        [KeyboardButton(text="UAH 🇺🇦"), KeyboardButton(text="GBP 🇬🇧")],
-        [KeyboardButton(text="PLN 🇵🇱"), KeyboardButton(text="CHF 🇨🇭")],
-        [KeyboardButton(text="CAD 🇨🇦"), KeyboardButton(text="AUD 🇦🇺")],
-        [KeyboardButton(text="CNY 🇨🇳"), KeyboardButton(text="JPY 🇯🇵")],
-        [KeyboardButton(text="TRY 🇹🇷"), KeyboardButton(text="AED 🇦🇪")],
-        [KeyboardButton(text="SEK 🇸🇪"), KeyboardButton(text="NOK 🇳🇴")],
-        [KeyboardButton(text="CZK 🇨🇿"), KeyboardButton(text="HUF 🇭🇺")],
-        [KeyboardButton(text="ILS 🇮🇱"), KeyboardButton(text="SGD 🇸🇬")],
-        [KeyboardButton(text="INR 🇮🇳"), KeyboardButton(text="BRL 🇧🇷")],
-        [KeyboardButton(text="🔙 Назад")]
-    ],
+    keyboard=[[KeyboardButton(text=currency)] for currency in sorted(currency_methods)],
     resize_keyboard=True
 )
+
 
 
 def format_cargo_data(cargo: Cargo) -> str:
@@ -668,7 +669,7 @@ async def handle_add_cargo(message: Message):
                 await message.answer("У вас нет username. Введите телефон в формате (+380...):")
         elif re.match(r"^\+?[1-9]\d{1,14}$", text):
             data["phone"] = text
-            await message.answer("Введите сумму оплаты:", reply_markup=currency_menu)
+            await message.answer("Введите сумму оплаты:") #, reply_markup=currency_menu
         else:
             await message.answer("Введите корректный телефон в формате (+380...)")
     elif "payment" not in data:
@@ -681,13 +682,13 @@ async def handle_add_cargo(message: Message):
                 await message.answer("Сумма должна быть > 0")
         except ValueError:
             await message.answer("Введите сумму оплати")
-    elif "currency" not in data and text in ["USD", "EUR", "UAH"]:
+    elif "currency" not in data and text in payment_methods:
         data["currency"] = text
         await message.answer("Выберите тип транспорта:", reply_markup=truck_menu)
-    elif "truck" not in data and text in ["Тент/фура", "Рефрижератор", "Изотерм", "Открытая платформа", "Автоцистерна"]:
+    elif "truck" not in data and text in truck_types:
         data["truck"] = text
         await message.answer("Выберите способ оплаты:", reply_markup=payment_menu)
-    elif "payment_method" not in data and text in ["Наличные", "Безналичные", "Перевод"]:
+    elif "payment_method" not in data and text in currency_methods:
         data["payment_method"] = text
         await message.answer("Введите комментарий:")
     elif "description" not in data:
