@@ -293,10 +293,13 @@ async def show_cargos(message: Message):
 
     for cargo in cargos:
         msg = (
-            f"🔸 Номер: {cargo.shipment_id}\n"
             f"📦 Название: {cargo.name}\n"
             f"🚚 Маршрут: {cargo.origin} → {cargo.destination}\n"
+            f"🚛 Тип транспорта: {cargo.truck}\n"
             f"💵 Оплата: {cargo.payment} {cargo.currency}"
+            f"💳 Способ оплаты: {cargo.payment_method}\n"
+            f"📝 Комментарий: {cargo.description}\n"
+            f"🔑 Номер перевозки: {cargo.shipment_id}"
         )
 
         builder = InlineKeyboardBuilder()
