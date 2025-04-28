@@ -274,8 +274,7 @@ def get_user_cargos(user_id: int) -> list:
     return list(Cargo.objects.filter(user_id=user_id).select_related('company'))
 
 
-@sync_to_async
-def save_cargo_to_db(user_id: int, data: dict):
+async def save_cargo_to_db(user_id: int, data: dict):
     """Сохранение груза в БД"""
     try:
         # Получаем пользователя
@@ -304,6 +303,12 @@ def save_cargo_to_db(user_id: int, data: dict):
             created_at=data.get('created_at', timezone.now())
         )
 
+        # Отправляем в группу водителей и сохраняем message_id
+        message_id = await send_to_drivers_channel(cargo)
+        if message_id:
+            cargo.message_id = message_id
+            cargo.save()
+
         return cargo
     except Exception as e:
         logger.error(f"Ошибка сохранения: {e}")
@@ -312,14 +317,15 @@ def save_cargo_to_db(user_id: int, data: dict):
 
 @sync_to_async
 def delete_cargo_from_db(shipment_id: str, user_id: int):
-    """Удаление груза из БД"""
+    """Удаление груза из БД и соответствующего сообщения в группе"""
     try:
         cargo = Cargo.objects.get(shipment_id=shipment_id, user_id=user_id)
+        message_id = cargo.message_id
         cargo.delete()
-        return True
+        return message_id  # Возвращаем ID сообщения для удаления
     except Cargo.DoesNotExist:
         logger.warning(f"Груз не найден для удаления: {shipment_id}")
-        return False
+        return None
     except Exception as e:
         logger.error(f"Ошибка при удалении груза: {e}")
         raise
@@ -365,13 +371,17 @@ async def send_to_drivers_channel(cargo: Cargo):
         builder.button(text="📞 Позвонить", url=f"https://t.me/share/phone?phone={clean_phone}")
 
     try:
-        await bot.send_message(
+        sent_message = await bot.send_message(
             chat_id=DRIVERS_GROUP_ID,
             text=driver_message,
             reply_markup=builder.as_markup()
         )
+        # Сохраняем ID сообщения в базе
+        await sync_to_async(cargo.save)()
+        return sent_message.message_id
     except Exception as e:
         logger.error(f"Ошибка отправки водителям: {e}")
+        return None
 
 
 # Обработчики команд
@@ -427,8 +437,21 @@ async def delete_cargo(callback: CallbackQuery):
     user_id = callback.from_user.id
 
     try:
-        success = await delete_cargo_from_db(shipment_id, user_id)
-        if success:
+        message_id = await delete_cargo_from_db(shipment_id, user_id)
+        if message_id is not None:
+            # Пытаемся удалить сообщение из группы водителей
+            try:
+                await bot.delete_message(chat_id=DRIVERS_GROUP_ID, message_id=message_id)
+            except TelegramBadRequest as e:
+                if "message to delete not found" in str(e):
+                    logger.info("Сообщение уже было удалено")
+                elif "message can't be deleted" in str(e):
+                    logger.info("Прошло более 48 часов, сообщение нельзя удалить")
+                else:
+                    logger.warning(f"Ошибка при удалении сообщения: {e}")
+            except TelegramAPIError as e:
+                logger.error(f"Ошибка API Telegram при удалении сообщения: {e}")
+
             await callback.answer("Груз удален", show_alert=True)
             await callback.message.delete()
         else:
@@ -657,7 +680,7 @@ async def handle_add_cargo(message: Message):
             else:
                 await message.answer("Сумма должна быть > 0")
         except ValueError:
-            await message.answer("Введите число")
+            await message.answer("Введите сумму оплати")
     elif "currency" not in data and text in ["USD", "EUR", "UAH"]:
         data["currency"] = text
         await message.answer("Выберите тип транспорта:", reply_markup=truck_menu)

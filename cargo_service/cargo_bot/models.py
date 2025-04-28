@@ -31,3 +31,4 @@ class Cargo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
+    message_id = models.BigIntegerField(null=True, blank=True)
